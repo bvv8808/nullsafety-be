@@ -2,10 +2,12 @@
   "name": "nullsafety-be",
   "version": "1.0.0",
   "description": "",
-  "main": "app.ts",
+  "main": "./dist/src/app.js",
   "scripts": {
     "test": "mocha __test__/**/*.ts -r ts-node/register",
-    "start": "ts-node ./src/app.ts",
+    "start": "node ./dist/src/app.js",
+    "start-dev": "ts-node ./src/app.ts",
+    "build": "tsc",
     "dev": "nodemon --exec ts-node src/app.ts"
   },
   "keywords": [],
@@ -20,11 +22,11 @@
     "chai": "^4.3.4",
     "mocha": "^9.1.1",
     "nodemon": "^2.0.12",
-    "supertest": "^6.1.6"
+    "supertest": "^6.1.6",
+    "typescript": "^4.4.3"
   },
   "dependencies": {
     "express": "^4.17.1",
-    "ts-node": "^10.2.1",
-    "typescript": "^4.4.3"
+    "ts-node": "^10.2.1"
   }
 }
