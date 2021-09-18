@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import "reflect-metadata";
 
 const express = require("express");
 
