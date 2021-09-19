@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "adm",
+    "password": "3353",
+    "database": "nullsafety",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "logging": false
+  },
+  "test": {
+    "username": "adm",
+    "password": "3353",
+    "database": "nullsafety",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "adm",
+    "password": "3353",
+    "database": "nullsafety",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}

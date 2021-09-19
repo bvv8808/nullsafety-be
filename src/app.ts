@@ -1,12 +1,18 @@
 import { NextFunction, Request, Response } from "express";
 
 const express = require("express");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 
+const { sequelize } = require("../models/");
+sequelize.sync();
+
 app.set("port", process.env.PORT || 5000);
 
-app.use("/", require("./routes/rootRouter"));
+app.use("/", require("./routes/basicRouter"));
+app.use("/adm", require("./routes/admRouter"));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const err: any = new Error("Not Found");
