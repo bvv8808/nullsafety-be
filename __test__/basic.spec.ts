@@ -13,11 +13,10 @@ describe("[MAIN_1]: 방문자 수와 HOT 컨텐츠", () => {
       .end((err, res) => {
         const result: IResMain1 = res.body;
         try {
-          // expect(result).to.be.exist;
           expect(result.cntToday).to.be.exist;
-          //   expect(result.cntTotal).to.be.exist;
-          //   expect(result.contentPreviewsByHit).instanceOf(Array);
-          //   expect(result.contentPreviewsByLike).instanceOf(Array);
+          expect(result.cntTotal).to.be.exist;
+          expect(result.contentPreviewsByHit).instanceOf(Array);
+          expect(result.contentPreviewsByLike).instanceOf(Array);
           done();
         } catch (e) {}
         // expect(res.text).to.equal("Hello");
