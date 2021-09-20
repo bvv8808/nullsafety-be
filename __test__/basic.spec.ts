@@ -22,4 +22,27 @@ describe("[MAIN_1]: 방문자 수와 HOT 컨텐츠", () => {
         // expect(res.text).to.equal("Hello");
       });
   });
+
+  it("Visit: Correct Path", (done) => {
+    const urlVisit = "/visit";
+    const urlMain = "/main";
+    let todayVisit: number;
+    request(app)
+      .get(urlMain)
+      .end((err, res) => {
+        todayVisit = res.body.cntToday;
+
+        request(app)
+          .post(urlVisit)
+          .expect(200)
+          .end((err, res) => {
+            request(app)
+              .get(urlMain)
+              .end((err, res) => {
+                expect(res.body.cntToday).to.be.equal(todayVisit + 1);
+                done();
+              });
+          });
+      });
+  });
 });
