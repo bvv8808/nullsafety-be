@@ -25,7 +25,7 @@ module.exports = (sequelize: Sequelize) =>
         defaultValue: "",
       },
       createdAt: {
-        type: DATE,
+        type: STRING(10),
         defaultValue: NOW,
       },
     },
