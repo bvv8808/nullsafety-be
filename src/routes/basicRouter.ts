@@ -7,6 +7,7 @@ const {
   Content,
   Visitor,
   Category,
+  Like,
   sequelize: seq,
 } = require("../../models");
 
@@ -197,12 +198,54 @@ router.get(
         nextContentPreview,
       };
 
-      console.log(responseData);
-
       res.json(responseData);
     } catch (e) {
       console.warn("DB ERROR::: ", e);
       res.json({});
+    }
+  }
+);
+
+router.post(
+  "/like",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { host } = req.headers;
+      const { cid } = req.body;
+
+      if (!cid || typeof cid !== "number") {
+        res.json({ code: 2, msg: "Invalid content id" });
+        return;
+      }
+
+      const existedContent = await Content.findOne({ where: { id: cid } });
+      if (!existedContent) {
+        res.json({ code: 3, msg: "Unknown content" });
+        return;
+      }
+
+      const alreadyLiked = await Like.findOne({
+        where: {
+          host,
+          cid,
+        },
+      });
+
+      if (alreadyLiked) {
+        res.json({ code: 1, msg: "Already liked" });
+        return;
+      }
+
+      Content.update(
+        { liked: existedContent.liked + 1 },
+        { where: { id: cid } }
+      );
+      Like.create({ host, cid });
+
+      res.json({ code: 0, msg: "Success" });
+    } catch (e) {
+      console.warn("::::::", e);
+      res.status(500).json({ code: -1, msg: "Internal server error" });
     }
   }
 );

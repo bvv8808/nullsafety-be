@@ -1,7 +1,7 @@
 import { expect, should } from "chai";
 import { describe, it } from "mocha";
 import request from "supertest";
-import { IResContent2, IResMain1 } from "../src/lib/interfaces";
+import { IResCode, IResContent2, IResMain1 } from "../src/lib/interfaces";
 import { TContentPreview } from "../src/lib/types";
 const app = require("../src/app");
 
@@ -89,7 +89,7 @@ describe("[CONTENT_1]: 특정 카테고리의 컨텐츠 목록 (요약 정보)",
 });
 
 describe("[CONTENT_2]: 특정 컨텐츠 상세 정보와 이전/다음 컨텐츠 링크", () => {
-  it("Correct Category", (done) => {
+  it("Correct content id", (done) => {
     const url = "/content?cid=1";
     request(app)
       .get(url)
@@ -120,6 +120,57 @@ describe("[CONTENT_2]: 특정 컨텐츠 상세 정보와 이전/다음 컨텐츠
           expect(nextContentPreview.thumbnail).to.be.exist;
           expect(nextContentPreview.id).to.be.exist;
         }
+        done();
+      });
+  });
+});
+
+describe("[CONTENT_3]: 특정 게시물에 따봉", () => {
+  const url = "/like";
+  it("Correct content id", (done) => {
+    request(app)
+      .post(url)
+      .send({ cid: 1 })
+      .expect(200)
+      .end((err, res) => {
+        const response: IResCode = res.body;
+        expect(response.code).to.be.equal(0);
+        done();
+      });
+  });
+
+  it("Invalid content id (miss cid)", (done) => {
+    request(app)
+      .post(url)
+      .expect(200)
+      .end((err, res) => {
+        const response: IResCode = res.body;
+        expect(response.msg).to.be.equal("Invalid content id");
+        done();
+      });
+  });
+
+  it("Invalid content id (not number)", (done) => {
+    request(app)
+      .post(url)
+      .send({ cid: "React" })
+      .expect(200)
+      .end((err, res) => {
+        const response: IResCode = res.body;
+        expect(response.msg).to.be.equal("Invalid content id");
+        done();
+      });
+  });
+
+  it("Invalid content id (wrong number)", (done) => {
+    const url = "/like";
+    request(app)
+      .post(url)
+      .send({ cid: -1 })
+      .expect(200)
+      .end((err, res) => {
+        const response: IResCode = res.body;
+        expect(response.msg).to.be.equal("Unknown content");
         done();
       });
   });

@@ -12,3 +12,8 @@ export interface IResContent2 {
   prevContentPreview?: TContentPreview;
   nextContentPreview?: TContentPreview;
 }
+
+export interface IResCode {
+  code: number;
+  msg: string;
+}
