@@ -1,7 +1,7 @@
 import { expect, should } from "chai";
 import { describe, it } from "mocha";
 import request from "supertest";
-import { IResMain1 } from "../src/lib/interfaces";
+import { IResContent2, IResMain1 } from "../src/lib/interfaces";
 import { TContentPreview } from "../src/lib/types";
 const app = require("../src/app");
 
@@ -83,6 +83,43 @@ describe("[CONTENT_1]: 특정 카테고리의 컨텐츠 목록 (요약 정보)",
       .expect(500)
       .end((err, res) => {
         expect(res.text).to.be.equal("Internal server error");
+        done();
+      });
+  });
+});
+
+describe("[CONTENT_2]: 특정 컨텐츠 상세 정보와 이전/다음 컨텐츠 링크", () => {
+  it("Correct Category", (done) => {
+    const url = "/content?cid=1";
+    request(app)
+      .get(url)
+      .expect(200)
+      .end((err, res) => {
+        const response: IResContent2 = res.body;
+        const { contentData, prevContentPreview, nextContentPreview } =
+          response;
+
+        expect(contentData).to.be.exist;
+        expect(contentData.id).to.be.exist;
+        expect(contentData.category).to.be.exist;
+        expect(contentData.content).to.be.exist;
+        expect(contentData.createdAt).to.be.exist;
+        expect(contentData.title).to.be.exist;
+
+        if (prevContentPreview) {
+          expect(prevContentPreview.title).to.be.exist;
+          expect(prevContentPreview.category).to.be.exist;
+          expect(prevContentPreview.createdAt).to.be.exist;
+          expect(prevContentPreview.thumbnail).to.be.exist;
+          expect(prevContentPreview.id).to.be.exist;
+        }
+        if (nextContentPreview) {
+          expect(nextContentPreview.title).to.be.exist;
+          expect(nextContentPreview.category).to.be.exist;
+          expect(nextContentPreview.createdAt).to.be.exist;
+          expect(nextContentPreview.thumbnail).to.be.exist;
+          expect(nextContentPreview.id).to.be.exist;
+        }
         done();
       });
   });

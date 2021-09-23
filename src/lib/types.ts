@@ -1,5 +1,5 @@
 export type TContentPreview = {
-  idx: number;
+  id: number;
   title: string;
   category: string;
   thumbnail: string;
@@ -7,7 +7,7 @@ export type TContentPreview = {
 };
 
 export type TContent = {
-  idx: number;
+  id: number;
   title: string;
   category: string;
   createdAt: string;

@@ -152,4 +152,59 @@ router.get(
   }
 );
 
+router.get(
+  "/content",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { cid } = req.query;
+    let categoryName = "";
+    try {
+      const dbResult = await seq.query(
+        `select*, lag(id) over() as prev, lead(id) over() as next from contents`
+      );
+      if (!dbResult) next(new Error("Invalid content id"));
+      let content = dbResult[0][0];
+
+      const category = await Category.findOne({ where: { id: content.cid } });
+      categoryName = category.name;
+
+      content.createdAt = "2021-09-23";
+      content.category = categoryName;
+
+      let prevContentPreview;
+      let nextContentPreview;
+      if (content.prev) {
+        prevContentPreview = await Content.findOne({
+          where: { id: content.prev },
+        });
+        prevContentPreview.category = categoryName;
+        delete prevContentPreview.cid;
+      }
+      if (content.next) {
+        nextContentPreview = await Content.findOne({
+          where: { id: content.next },
+        });
+        nextContentPreview.category = categoryName;
+        delete nextContentPreview.cid;
+      }
+
+      delete content.prev;
+      delete content.next;
+      delete content.cid;
+
+      const responseData = {
+        contentData: content,
+        prevContentPreview,
+        nextContentPreview,
+      };
+
+      console.log(responseData);
+
+      res.json(responseData);
+    } catch (e) {
+      console.warn("DB ERROR::: ", e);
+      res.json({});
+    }
+  }
+);
+
 module.exports = router;
