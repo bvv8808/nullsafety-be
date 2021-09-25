@@ -12,6 +12,7 @@ sequelize.sync();
 app.set("port", process.env.PORT || 5000);
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.json());
+app.use(require("cookie-parser")());
 
 app.use("/", require("./routes/basicRouter"));
 app.use("/adm", require("./routes/admRouter"));

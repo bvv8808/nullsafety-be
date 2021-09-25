@@ -22,7 +22,7 @@ export type TCntContents = {
 export type TCntLike = TCntContents;
 
 export type TCategoryDetail = {
-  idx: number;
+  id: number;
   name: string;
   priority: number;
 };
