@@ -1,10 +1,22 @@
-import { TContent, TContentPreview } from "./types";
+import {
+  TCntContents,
+  TCntLike,
+  TContent,
+  TContentPreview,
+  TVisitor,
+} from "./types";
 
 export interface IResMain1 {
   cntToday: number;
   cntTotal: number;
   contentPreviewsByHit: TContentPreview[];
   contentPreviewsByLike: TContentPreview[];
+}
+
+export interface IResDash {
+  cntVisitor: TVisitor;
+  cntContents: TCntContents;
+  cntLike: TCntLike;
 }
 
 export interface IResContent2 {
