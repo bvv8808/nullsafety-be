@@ -11,9 +11,10 @@ sequelize.sync();
 
 app.set("port", process.env.PORT || 5000);
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
-app.use(express.json());
+app.use(express.json({ limit: "20mb" }));
 app.use(require("cookie-parser")());
 
+app.use("/imgs", express.static("imgs"));
 app.use("/", require("./routes/basicRouter"));
 app.use("/adm", require("./routes/admRouter"));
 
@@ -25,6 +26,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(err.status || 500);
+  console.error("#Error:::: ", err);
+
   if (err.message === "Not Found") res.send("404 Not Found");
   else res.send("Internal server error");
 });

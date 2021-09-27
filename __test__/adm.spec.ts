@@ -139,7 +139,8 @@ describe("[CONTENT_5]: 컨텐츠 등록 및 수정", () => {
 
   it("등록", (done) => {
     const body = {
-      content: "# Title1\nContent",
+      content:
+        "# Title1\nContent\n![](/imgs/1234.jpg)이러쿵저러쿵 ![](/imgs/54545.png)",
       category: "Network",
       title: "My Test Content",
     };
@@ -229,6 +230,48 @@ describe("[MASTER_2]: 월별 방문자 집계, 총 방문자 수", () => {
         expect(result.cntVisitor.total).to.be.greaterThanOrEqual(0);
         expect(result.cntVisitor.today).to.be.greaterThanOrEqual(0);
         expect(result.cntVisitor.months).to.be.instanceOf(Array);
+
+        done();
+      });
+  });
+});
+
+describe("[CONTENT_6]: 이미지 업로드", () => {
+  const url = "/adm/pic";
+
+  it("정상 등록 케이스는 base64길이가 길므로 postman에서 수행", (done) => {
+    done();
+  });
+
+  it("Invalid base64 string", (done) => {
+    const body = {
+      pic: "abcd",
+    };
+
+    request(app)
+      .post(url)
+      .set("Cookie", `token=${token}`)
+      .send(body)
+      .end((err, res) => {
+        expect(res.body.code).to.be.equal(1);
+        expect(res.body.msg).to.be.equal("Invalid base64 string");
+        expect(res.body.path.length).to.be.equal(0);
+
+        done();
+      });
+  });
+
+  it("Missing image string", (done) => {
+    const body = {};
+
+    request(app)
+      .post(url)
+      .set("Cookie", `token=${token}`)
+      .send(body)
+      .end((err, res) => {
+        expect(res.body.code).to.be.equal(2);
+        expect(res.body.msg).to.be.equal("Missing image");
+        expect(res.body.path.length).to.be.equal(0);
 
         done();
       });

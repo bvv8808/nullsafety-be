@@ -9,6 +9,8 @@ import {
 import createToken from "../middlewares/createToken";
 import verifyToken from "../middlewares/verifyToken";
 import { Op } from "sequelize";
+const fs = require("fs");
+const path = require("path");
 
 const {
   Visit,
@@ -16,6 +18,7 @@ const {
   Visitor,
   Category,
   Like,
+  Img,
   sequelize: seq,
 } = require("../../models");
 
@@ -110,6 +113,7 @@ router.post(
     const { category, content, title, cid } = req.body;
     const categoryId = (await Category.findOne({ where: { name: category } }))
       .id;
+
     if (!cid) {
       const now = new Date();
       const today =
@@ -121,12 +125,16 @@ router.post(
 
       Content.create({ content, cid: categoryId, title, createdAt: today })
         .then((r: any) => {
+          Img.update({ cid: r.id }, { where: { cid: -1 } }).catch((e: any) => {
+            console.warn("Error in creat content2 ::: ", e);
+          });
           res.json({ code: 0, msg: "Created" });
         })
         .catch((e: any) => {
           console.warn("Error in create content ::: ", e);
           res.json({ code: -1, msg: "Internal server error" });
         });
+
       return;
     }
 
@@ -138,6 +146,15 @@ router.post(
         console.warn("Error in modify content ::: ", e);
         res.json({ code: -1, msg: "Internal server error" });
       });
+
+    let imgs = content.match(/!\[\]\(\S+(\.(jpg|png|gif))/g);
+    if (imgs) {
+      await Img.destroy({ where: { id: cid } });
+      imgs = imgs.map((i: string) => {
+        const path = i.substring(4);
+        Img.create({ path, cid });
+      });
+    }
   }
 );
 
@@ -207,8 +224,6 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
     let cntContents: TCntContents = { total: 0, perCategory: [] };
     let cntLike: TCntLike = { total: 0, perCategory: [] };
 
-    console.log("#1", contents);
-
     for (let { dataValues: cur } of contents) {
       const curCategory = dictCategory[cur.cid];
       const liked = Number(cur.liked);
@@ -231,4 +246,38 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.post("/pic", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log("#0");
+
+    const { pic } = req.body;
+    if (pic === undefined) {
+      res.json({ code: 2, msg: "Missing image", path: "" });
+      return;
+    } else if (typeof pic !== "string" || pic.length < 100) {
+      res.json({ code: 1, msg: "Invalid base64 string", path: "" });
+      return;
+    }
+
+    // fs.write
+    // const now
+    // path.join(__dirname, '../../imgs', ``)
+    console.log(__dirname);
+    console.log(`${__dirname}/../../imgs/1.jpg`);
+
+    const picName = `${new Date().getTime()}.jpg`;
+    const picPath = `${__dirname}/../../imgs/${picName}`;
+    fs.writeFile(picPath, Buffer.from(pic, "base64"), (err: any) => {
+      console.warn("#1", err);
+    });
+
+    // db.create
+    // response
+    res.json({ code: 0, msg: "Success", path: "/imgs/" + picName });
+  } catch (e) {
+    console.warn("#2", e);
+
+    next(new Error());
+  }
+});
 module.exports = router;
