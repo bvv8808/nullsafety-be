@@ -6,8 +6,8 @@ dotenv.config();
 
 const app = express();
 
-// const { sequelize } = require("../models/");
-// sequelize.sync();
+const { sequelize } = require("../models/");
+sequelize.sync();
 
 app.set("port", process.env.PORT || 5000);
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
