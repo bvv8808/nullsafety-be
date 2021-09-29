@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 dotenv.config();
 
 const app = express();
@@ -10,6 +11,7 @@ const { sequelize } = require("../models/");
 sequelize.sync();
 
 app.set("port", process.env.PORT || 5000);
+app.use(cors());
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.json({ limit: "20mb" }));
 app.use(require("cookie-parser")());
