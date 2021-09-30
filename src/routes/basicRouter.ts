@@ -109,7 +109,7 @@ router.post("/visit", async (req: Request, res: Response) => {
 
 // [CATEGORY_1] 카테고리 이름 목록
 router.get("/categories", async (req: Request, res: Response) => {
-  Category.findAll({ attribute: ["name"] })
+  Category.findAll({ attributes: ["name"] })
     .then((r: any) => {
       res.json({ categories: r });
     })

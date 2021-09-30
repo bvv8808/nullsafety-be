@@ -90,7 +90,6 @@ router.post(
       attribute: ["priority", "name"],
       order: [["priority", "desc"]],
     });
-    console.log("# Categories::: ", categories);
 
     if (categories && categories.length) lastPriority = categories[0].priority;
 
