@@ -111,7 +111,9 @@ router.post("/visit", async (req: Request, res: Response) => {
 router.get("/categories", async (req: Request, res: Response) => {
   Category.findAll({ attributes: ["name"] })
     .then((r: any) => {
-      res.json({ categories: r });
+      res.json({
+        categories: r.map((category: any) => category.dataValues.name),
+      });
     })
     .catch((e: any) => {
       console.warn("Error in find categories::::: ", e);
