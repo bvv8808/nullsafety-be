@@ -90,7 +90,9 @@ router.post(
       attribute: ["priority", "name"],
       order: [["priority", "desc"]],
     });
-    if (categories) lastPriority = categories[0].priority;
+    console.log("# Categories::: ", categories);
+
+    if (categories && categories.length) lastPriority = categories[0].priority;
 
     if (categories.some((c: TCategoryDetail) => c.name === req.body.category)) {
       res.status(400).json({ code: 1, msg: "Duplicated name" });
