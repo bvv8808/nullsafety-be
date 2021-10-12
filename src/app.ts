@@ -11,7 +11,12 @@ const { sequelize } = require("../models/");
 sequelize.sync();
 
 app.set("port", process.env.PORT || 5000);
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.json({ limit: "20mb" }));
 app.use(require("cookie-parser")());

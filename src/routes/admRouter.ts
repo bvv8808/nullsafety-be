@@ -31,13 +31,23 @@ router.get("/", (req: Request, res: Response) => {
 router.post("/auth", (req: Request, res: Response) => {
   const { k } = req.body;
   const created = createToken(k);
+
   res.json({ token: created, code: created ? 0 : 1 });
 });
 
 router.get("/category", verifyToken, async (req: Request, res: Response) => {
+  // ## todo
+  // (1) db에서 order by priority, (2) find이후 Array.sort
+  // 둘 중 어느 것이 성능 면에서 유리한지 생각하기
   Category.findAll()
     .then((c: any) => {
-      res.json({ categories: c.map((item: any) => item.dataValues) });
+      res.json({
+        categories: c
+          .map((item: any) => item.dataValues)
+          .sort(
+            (a: TCategoryDetail, b: TCategoryDetail) => a.priority - b.priority
+          ),
+      });
     })
     .catch((e: any) => {
       console.warn("Error in adm/category::: ", e);
@@ -50,7 +60,9 @@ router.post(
   verifyToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const prev: TCategoryDetail[] = (await Category.findAll())
+      // #todo: Delete
+
+      let prev: TCategoryDetail[] = (await Category.findAll())
         .map((item: any) => item.dataValues)
         .sort((a: TCategoryDetail, b: TCategoryDetail) => a.id - b.id);
       const input: TCategoryDetail[] = req.body.categories.sort(
@@ -58,14 +70,34 @@ router.post(
       );
 
       let modified: { name?: string; priority?: number } = {};
-      for (let i in input) {
-        // name, priority
-        modified = {};
-        if (prev[i].name !== input[i].name) modified.name = input[i].name;
-        if (prev[i].priority !== input[i].priority)
-          modified.priority = input[i].priority;
+      for (let curInput of input) {
+        if (!prev[0]) break;
 
-        if (modified) Category.update(modified, { where: { id: prev[i].id } });
+        // 중간에 삭제된 카테고리가 있을 경우
+        if (curInput.id > prev[0].id) {
+          while (curInput.id !== prev[0].id) {
+            await Category.destroy({ where: { id: prev[0].id } });
+            prev.shift();
+          }
+        }
+        // 기존 카테고리 수정
+        if (curInput.id === prev[0].id) {
+          modified = {};
+          if (curInput.name !== prev[0].name) modified.name = curInput.name;
+          if (curInput.priority !== prev[0].priority)
+            modified.priority = curInput.priority;
+
+          if (modified)
+            Category.update(modified, { where: { id: prev[0].id } });
+
+          prev.shift();
+        }
+      }
+      // 끝에 삭제된 항목이 있는 경우
+      if (prev.length) {
+        prev.map((p) => {
+          Category.destroy({ where: { id: p.id } });
+        });
       }
 
       res.json({ code: 0, msg: "" });
@@ -249,8 +281,6 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
 
 router.post("/pic", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    console.log("#0");
-
     const { pic } = req.body;
     if (pic === undefined) {
       res.json({ code: 2, msg: "Missing image", path: "" });
@@ -260,14 +290,11 @@ router.post("/pic", async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    // fs.write
-    // const now
-    // path.join(__dirname, '../../imgs', ``)
-    console.log(__dirname);
-    console.log(`${__dirname}/../../imgs/1.jpg`);
-
     const picName = `${new Date().getTime()}.jpg`;
     const picPath = `${__dirname}/../../imgs/${picName}`;
+    Img.create({ path: picPath }).catch((e: any) => {
+      console.warn("Error in create picture::: ", e);
+    });
     fs.writeFile(picPath, Buffer.from(pic, "base64"), (err: any) => {
       console.warn("#1", err);
     });

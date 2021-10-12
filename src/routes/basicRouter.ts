@@ -37,13 +37,35 @@ router.get("/main", async (req: Request, res: Response) => {
   `)
   )[0];
 
-  const contentPreviewsByHit = await Content.findAll({
-    orders: [["hit", "asc"]],
-    limit: 5,
+  let categoryDict: any = {};
+  const categories = await Category.findAll();
+  for (let c of categories) {
+    categoryDict[c.id] = c.name;
+  }
+
+  const contentPreviewsByHit = (
+    await Content.findAll({
+      order: [["hit", "desc"]],
+      limit: 5,
+    })
+  ).map((c: any) => {
+    c.dataValues.category = categoryDict[c.dataValues.cid];
+    delete c.dataValues.cid;
+    delete c.dataValues.content;
+
+    return c.dataValues;
   });
-  const contentPreviewsByLike = await Content.findAll({
-    orders: [["liked", "asc"]],
-    limit: 5,
+  const contentPreviewsByLike = (
+    await Content.findAll({
+      order: [["liked", "desc"]],
+      limit: 5,
+    })
+  ).map((c: any) => {
+    c.dataValues.category = categoryDict[c.dataValues.cid];
+    delete c.dataValues.cid;
+    delete c.dataValues.content;
+
+    return c.dataValues;
   });
 
   res.json({
@@ -74,7 +96,7 @@ router.post("/visit", async (req: Request, res: Response) => {
     return res.status(200).json({ code: 1, msg: "Already visited today" });
   // #3
   Visitor.create({ host }).catch((e: any) => {
-    console.log("Fail::: ", e);
+    // console.log("Fail::: ", e);
   });
 
   const now = new Date();
@@ -137,8 +159,8 @@ router.get(
     Content.findAll({
       where: { cid: categoryId },
       attributes: ["id", "title", "thumbnail", "createdAt"],
-      offset: offset || 0,
-      limit: limit || 20,
+      offset: Number(offset) || 0,
+      limit: Number(limit) || 20,
     })
       .then((r: any) => {
         const contentPreviews: TContentPreview = r.map((content: any) => {
@@ -159,22 +181,29 @@ router.get(
   "/content",
   async (req: Request, res: Response, next: NextFunction) => {
     const { cid } = req.query;
+
     let categoryName = "";
     try {
       const dbResult = await seq.query(
         `select*, lag(id) over() as prev, lead(id) over() as next from contents`
       );
-      if (!dbResult) next(new Error("Invalid content id"));
-      let content = dbResult[0][0];
+      const content = dbResult[0].find((r: any) => r.id === Number(cid));
+
+      if (!content) next(new Error("Invalid content id"));
 
       const category = await Category.findOne({ where: { id: content.cid } });
       categoryName = category.name;
 
       content.createdAt = "2021-09-23";
       content.category = categoryName;
+      content.content = content.content.toString("utf8");
+      content.hit += 1;
+
+      Content.update({ hit: content.hit }, { where: { id: content.id } });
 
       let prevContentPreview;
       let nextContentPreview;
+
       if (content.prev) {
         prevContentPreview = await Content.findOne({
           where: { id: content.prev },
