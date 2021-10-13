@@ -157,10 +157,16 @@ router.post(
         now.getDate().toString().padStart(2, "0");
 
       Content.create({ content, cid: categoryId, title, createdAt: today })
-        .then((r: any) => {
-          Img.update({ cid: r.id }, { where: { cid: -1 } }).catch((e: any) => {
-            console.warn("Error in creat content2 ::: ", e);
-          });
+        .then(async (r: any) => {
+          await Img.update({ cid: r.id }, { where: { cid: -1 } });
+          const thumbnail = await Img.findOne({ where: { cid: r.id } });
+          if (!thumbnail) return;
+          await Content.update(
+            { thumbnail: thumbnail.path },
+            { where: { id: r.id } }
+          );
+        })
+        .then(() => {
           res.json({ code: 0, msg: "Created" });
         })
         .catch((e: any) => {
@@ -291,11 +297,12 @@ router.post("/pic", async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const picName = `${new Date().getTime()}.jpg`;
-    const picPath = `${__dirname}/../../imgs/${picName}`;
+    const picPath = `/imgs/${picName}`;
+    const picPathAbs = `${__dirname}/../../imgs/${picName}`;
     Img.create({ path: picPath }).catch((e: any) => {
       console.warn("Error in create picture::: ", e);
     });
-    fs.writeFile(picPath, Buffer.from(pic, "base64"), (err: any) => {
+    fs.writeFile(picPathAbs, Buffer.from(pic, "base64"), (err: any) => {
       console.warn("#1", err);
     });
 
