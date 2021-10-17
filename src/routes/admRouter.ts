@@ -32,7 +32,11 @@ router.post("/auth", (req: Request, res: Response) => {
   const { k } = req.body;
   const created = createToken(k);
 
-  res.cookie("token", created, { sameSite: "none", secure: true });
+  res.cookie("token", created, {
+    // sameSite: "none", secure: true
+    domain: "146.56.187.12",
+    path: "/",
+  });
   res.json({ token: created, code: created ? 0 : 1 });
 });
 
