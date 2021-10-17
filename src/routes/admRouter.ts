@@ -32,7 +32,7 @@ router.post("/auth", (req: Request, res: Response) => {
   const { k } = req.body;
   const created = createToken(k);
 
-  res.json({ token: created, code: created ? 0 : 1 });
+  res.cookie("token", created).json({ token: created, code: created ? 0 : 1 });
 });
 
 router.get("/category", verifyToken, async (req: Request, res: Response) => {
