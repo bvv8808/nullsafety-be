@@ -34,7 +34,7 @@ router.post("/auth", (req: Request, res: Response) => {
 
   res.cookie("token", created, {
     // sameSite: "none", secure: true
-    domain: "146.56.187.12",
+    domain: "https://nullsafety-be.herokuapp.com/",
     path: "/",
   });
   res.json({ token: created, code: created ? 0 : 1 });
