@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha __test__/**/*.ts -r ts-node/register",
     "test-current": "mocha __test__/adm.spec.ts -r ts-node/register",
-    "start": "node ./dist/src/app.ts",
+    "start": "node ./dist/src/app.js",
     "build": "tsc",
     "dev": "nodemon --exec ts-node src/app.ts"
   },
